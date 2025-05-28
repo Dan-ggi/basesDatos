@@ -108,7 +108,7 @@ $conn = conexion_bd();
                     <td><?php echo $fila['Fecha']; ?></td>
                     <td><?php echo $fila['Total_Venta']; ?></td>
                     <td>
-                        <a href="eliminar_cliente.php?ID_Cliente=<?php echo $fila['ID_Cliente'];?>">Eliminar</a> |
+                        <a href="eliminar_venta.php?ID_Venta=<?php echo $fila['ID_Venta']; ?>">Eliminar</a> |
                         <a href="actualizar.php?ID_Venta=<?php echo $fila['ID_Venta'];?>">Actualizar</a>
                     </td>
                 </tr>
