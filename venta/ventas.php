@@ -57,9 +57,9 @@ $conn = conexion_bd();
         <label for="Metodo_Pago">Método de pago:</label><br>
         <select id="Metodo_Pago" name="ID_Metodo_Pago" required>
             <option value="">Seleccione el método de pago</option>
-            <option value="efectivo">Efectivo</option>
-            <option value="Tarjeta_Dbito">Tarjeta Débito</option>
-            <option value="Tarjeta_Credito">Tarjeta Crédito</option>
+            <option value="1">Efectivo</option>
+            <option value="2">Tarjeta Débito</option>
+            <option value="3">Tarjeta Crédito</option>
         </select><br><br>
 
 
