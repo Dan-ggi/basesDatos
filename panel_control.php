@@ -29,7 +29,8 @@
     <button onclick="location.href='venta/ventas.php'">Ventas</button>
     <button onclick="location.href='factura/facturas.php'">Facturas</button>
     <button onclick="location.href='reclamacion/reclamaciones.php'">Reclamaciones</button>
-    
+    <button onclick="location.href='producto_tienda/productos_tiendas.php'">Productos Tienda</button>
+    <button onclick="location.href='producto_afectado/productos_afectados.php'">Productos Afectados</button>
 
     <a href="/empresa/login/loguot.php">Cerrar Sesión</a>
 
