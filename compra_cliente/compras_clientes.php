@@ -1,123 +1,95 @@
 <?php
-    // MANEJO DE SESIONES
-    session_start();
-    if (!isset($_SESSION['usuario'])) {
-        header("Location: login.php");
-        exit;
-    }
+  // MANEJO DE SESIONES
+  session_start();
+  if(!isset($_SESSION['usuario'])){
+     header("Location: login.php");
+     exit;
+  }
 
-    // INCLUIR UNA SOLA VEZ LA CONEXIÓN
-    include '../conexion_bd.php';
-    $conn = conexion_bd();
+  // CONEXIÓN A BD Y CONSULTAS
+  include '../conexion_bd.php';
+  $conn = conexion_bd();
+
+  // Consulta para obtener clientes
+  $sql_clientes = "SELECT ID_Cliente, Documento, Nombre, Primer_Apellido FROM Clientes";
+  $resultado_clientes = mysqli_query($conn, $sql_clientes);
+
+  // Consulta para obtener facturas
+  $sql_facturas = "SELECT f.ID_Factura, f.ID_Cliente, c.Nombre, c.Primer_Apellido, c.Documento
+                   FROM Facturas f
+                   JOIN Clientes c ON f.ID_Cliente = c.ID_Cliente";
+  $resultado_facturas = mysqli_query($conn, $sql_facturas);
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Formulario Empleados</title>
+    <title>Formulario Compra</title>
 </head>
 <body>
-    <form action="insertar_empleados.php" method="POST">
-        <label for="documento">Documento:</label>
-        <input type="text" id="documento" name="Documento" required><br><br>
+    <form action="insertar_compra.php" method="POST">
 
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="Nombre" required><br><br>
+        <label for="ID_Cliente">Seleccionar cliente:</label><br>
+        <select name="ID_Cliente" id="ID_Cliente" required>
+            <option value="">Seleccione un cliente</option>
+            <?php while($cliente = mysqli_fetch_assoc($resultado_clientes)): ?>
+                <option value="<?php echo $cliente['ID_Cliente']; ?>">
+                    Cliente #<?php echo $cliente['ID_Cliente']; ?> - <?php echo $cliente['Nombre'] . " " . $cliente['Primer_Apellido']; ?> - Doc: <?php echo $cliente['Documento']; ?>
+                </option>
+            <?php endwhile; ?>
+        </select><br><br>
+        
+        <label for="ID_Factura">Seleccionar factura:</label><br>
+        <select name="ID_Factura" id="ID_Factura" required>
+            <option value="">Seleccione una factura</option>
+            <?php while($factura = mysqli_fetch_assoc($resultado_facturas)): ?>
+                <option value="<?php echo $factura['ID_Factura']; ?>">
+                    Factura #<?php echo $factura['ID_Factura']; ?> - Cliente #<?php echo $factura['ID_Cliente']; ?> - <?php echo $factura['Nombre'] . " " . $factura['Primer_Apellido']; ?> - Doc: <?php echo $factura['Documento']; ?>
+                </option>
+            <?php endwhile; ?>
+        </select><br><br>
 
-        <label for="primer_apellido">Primer apellido:</label>
-        <input type="text" id="primer_apellido" name="Primer_Apellido" required><br><br>
+        <label for="Cantidad_compras">Cantidad de compras:</label>
+        <input type="number" id="Cantidad_compras" name="Cantidad_compras" required><br><br>
 
-        <label for="segundo_apellido">Segundo apellido:</label>
-        <input type="text" id="segundo_apellido" name="Segundo_Apellido" required><br><br>
+        <label for="Fecha">Fecha:</label>
+        <input type="date" id="Fecha" name="Fecha" required><br><br>
 
-        <label for="telefono">Teléfono:</label>
-        <input type="text" id="telefono" name="Telefono" required><br><br>
-
-        <label for="correo">Correo Electrónico:</label>
-        <input type="email" id="correo" name="Email" required><br><br>
-
-        <label for="Tienda">Tienda:</label><br>
-        <select id="tienda_id" name="ID_Tienda" required>
-            <option value="">Seleccione la tienda</option>  
-            <?php
-                // CONSULTA PARA TIENDAS
-                $sql_tiendas = "SELECT ID_Tienda, Nombre_Tienda FROM Tiendas ORDER BY Nombre_Tienda ASC";
-                $resultado_tiendas = mysqli_query($conn, $sql_tiendas);
-                while ($fila = mysqli_fetch_assoc($resultado_tiendas)) {
-                    echo "<option value='" . $fila['ID_Tienda'] . "'>" . $fila['Nombre_Tienda'] . "</option>";
-                }
-            ?>
-        </select>
-
-        <br><br>
-
-        <label for="Cargos">Cargo:</label><br>
-        <select id="cargo_id" name="ID_Cargo" required>
-            <option value="">Seleccione el cargo</option>  
-            <?php
-                // CONSULTA PARA CARGOS
-                $sql_cargos = "SELECT ID_Cargo, Nombre_Cargo FROM Cargos ORDER BY Nombre_Cargo ASC";
-                $resultado_cargos = mysqli_query($conn, $sql_cargos);
-                while ($fila = mysqli_fetch_assoc($resultado_cargos)) {
-                    echo "<option value='" . $fila['ID_Cargo'] . "'>" . $fila['Nombre_Cargo'] . "</option>";
-                }
-            ?>
-        </select>
-
-        <br><br>
-        <input type="submit" value="Registrar Empleado">
+        <input type="submit" value="Registrar Compra">
     </form>
-
     <form>
         <input type="button" value="Volver al panel de control" onclick="location.href='../panel_control.php'">
     </form>
 
-    <br><br>
-
     <?php
-        // CARGA DE EMPLEADOS PARA MOSTRAR EN TABLA
-        $sql_empleados = "SELECT * FROM Empleados";
-        $resultados_empleados = mysqli_query($conn, $sql_empleados);
+        $sql_compra = "SELECT * FROM Compras_Clientes";
+        $resultados_compra = mysqli_query($conn, $sql_compra);
     ?>
 
     <table border="1">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>ID Tienda</th>
-                <th>ID Cargo</th>
-                <th>Documento</th>
-                <th>Nombre</th>
-                <th>Primer Apellido</th>
-                <th>Segundo Apellido</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-                <th>Eliminar</th>
-                <th>Actualizar</th>
+                <th>ID Compra</th>
+                <th>ID Cliente</th>
+                <th>ID Factura</th>
+                <th>Cantidad compras</th>
             </tr>
         </thead>
         <tbody>
-            <?php while ($fila = mysqli_fetch_assoc($resultados_empleados)): ?>
+            <?php while($fila = mysqli_fetch_assoc($resultados_compra)): ?>
                 <tr>
-                    <td><?php echo $fila['ID_Empleado']; ?></td>
-                    <td><?php echo $fila['ID_Tienda']; ?></td>
-                    <td><?php echo $fila['ID_Cargo']; ?></td>
-                    <td><?php echo $fila['Documento']; ?></td>
-                    <td><?php echo $fila['Nombre']; ?></td>
-                    <td><?php echo $fila['Primer_Apellido']; ?></td>
-                    <td><?php echo $fila['Segundo_Apellido']; ?></td>
-                    <td><?php echo $fila['Telefono']; ?></td>
-                    <td><?php echo $fila['Email']; ?></td>
-                    <td><a href="eliminar_empleado.php?ID_Empleado=<?php echo $fila['ID_Empleado']; ?>">Eliminar</a></td>
-                    <td><a href="actualizar.php?ID_Empleado=<?php echo $fila['ID_Empleado']; ?>">Actualizar</a></td>
+                    <td><?php echo $fila['ID_Compra']; ?></td>
+                    <td><?php echo $fila['ID_Cliente']; ?></td>
+                    <td><?php echo $fila['ID_Factura']; ?></td>
+                    <td><?php echo $fila['Cantidad_compras']; ?></td>
+                    <td><a href="eliminar_compra.php?ID_Compra=<?php echo $fila['ID_Compra'];?>">eliminar</a></td>
+                    <td><a href="actualizar.php?ID_Compra=<?php echo $fila['ID_Compra'];?>">actualizar</a></td>
                 </tr>
             <?php endwhile; ?>  
         </tbody>
     </table>
 
-    <br>
-    <a href="/empresa/login/logout.php">Cerrar Sesión</a> <!-- Corregido loguot por logout -->
+    <a href="/empresa/login/loguot.php">Cerrar Sesión</a>
 
 </body>
 </html>
