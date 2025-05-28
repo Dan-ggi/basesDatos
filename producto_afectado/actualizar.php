@@ -11,13 +11,11 @@
     include '../conexion_bd.php';
     $conn = conexion_bd();
 
-    $ID_Cargo = $_GET['ID_Cargo'];
-    $sql="SELECT * FROM Cargos WHERE ID_Cargo = $ID_Cargo";
+    $id = $_GET['id'];
+    $sql="SELECT * FROM Productos_Afectados WHERE id = $id";
     $resultado = mysqli_query($conn, $sql);
     $fila = mysqli_fetch_assoc($resultado);
 
-    $ID_Cargo = $fila['ID_Cargo'];
-    $Nombre_Cargo = $fila['Nombre_Cargo'];
 
 ?>
 
@@ -25,14 +23,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>actualizar cargo</title>
+    <title>actualizar producto afectado</title>
 </head>
 <body>
     <form action="actualizar_cargo.php" method="POST">
-        <input type="hidden" name="ID_Cargo" value="<?php echo $ID_Cargo; ?>" hidden>
+        <input type="hidden" name="id" value="<?php echo $id; ?>" hidden>
 
-        <label for="Nombre_Cargo">Nombre cargo:</label>
-        <input type="text" id="Nombre_Cargo" name="Nombre_Cargo" value="<?php echo $Nombre_Cargo; ?>" required><br><br>
+        
 
         <input type="submit" value="actualizar cargo">
     </form>

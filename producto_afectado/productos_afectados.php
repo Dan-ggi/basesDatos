@@ -75,7 +75,7 @@ if (!isset($_SESSION['usuario'])) {
                     <td><?php echo $fila['ID_Producto']; ?></td>
                     <td>
                         <a href="eliminar_producto_afectado.php?ID_Reclamacion=<?php echo $fila['ID_Reclamacion']; ?>&ID_Producto=<?php echo $fila['ID_Producto']; ?>">Eliminar</a> |
-                        <a href="actualizar_producto_afectado.php?ID_Reclamacion=<?php echo $fila['ID_Reclamacion']; ?>&ID_Producto=<?php echo $fila['ID_Producto']; ?>">Actualizar</a>
+                        <a href="actualizar.php?ID_Reclamacion=<?php echo $fila['ID_Reclamacion']; ?>&ID_Producto=<?php echo $fila['ID_Producto']; ?>">Actualizar</a>
                     </td>
                 </tr>
             <?php endwhile; ?>  
