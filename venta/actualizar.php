@@ -1,5 +1,4 @@
 <?php
-// MANEJO DE SESIONES
 session_start();
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
@@ -9,18 +8,21 @@ if (!isset($_SESSION['usuario'])) {
 include '../conexion_bd.php';
 $conn = conexion_bd();
 
-$ID_Venta = $_GET['ID_Venta'];
-$sql = "SELECT * FROM Ventas WHERE ID_Venta = $ID_Venta";
-$resultado = mysqli_query($conn, $sql);
-$fila = mysqli_fetch_assoc($resultado);
+if (!isset($_GET['ID_Venta'])) {
+    echo "ID de venta no proporcionado.";
+    exit;
+}
 
-// Variables para cargar en el formulario
-$ID_Factura = $fila['ID_Factura'];
-$ID_Tienda = $fila['ID_Tienda'];
-$ID_Cliente = $fila['ID_Cliente'];
-$ID_Metodo_Pago = $fila['ID_Metodo_Pago'];
-$Fecha = $fila['Fecha'];
-$Total_Venta = $fila['Total_Venta'];
+$id_venta = intval($_GET['ID_Venta']);
+
+$sql = "SELECT * FROM Ventas WHERE ID_Venta = $id_venta";
+$resultado = mysqli_query($conn, $sql);
+$venta = mysqli_fetch_assoc($resultado);
+
+if (!$venta) {
+    echo "Venta no encontrada.";
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -30,65 +32,48 @@ $Total_Venta = $fila['Total_Venta'];
     <title>Actualizar Venta</title>
 </head>
 <body>
+    <h2>Actualizar Venta</h2>
+    <form action="actualizar_venta.php" method="POST">
+        <input type="hidden" name="ID_Venta" value="<?php echo $venta['ID_Venta']; ?>">
 
-<h1>Actualizar Venta</h1>
+        <label for="ID_Tienda">Tienda:</label>
+        <select name="ID_Tienda" required>
+            <?php
+                $tiendas = mysqli_query($conn, "SELECT ID_Tienda, Nombre_Tienda FROM Tiendas ORDER BY Nombre_Tienda ASC");
+                while ($t = mysqli_fetch_assoc($tiendas)) {
+                    $selected = ($t['ID_Tienda'] == $venta['ID_Tienda']) ? "selected" : "";
+                    echo "<option value='{$t['ID_Tienda']}' $selected>{$t['Nombre_Tienda']}</option>";
+                }
+            ?>
+        </select><br><br>
 
-<form action="actualizar_venta.php" method="POST">
-    <input type="hidden" name="ID_Venta" value="<?php echo $ID_Venta; ?>">
+        <label for="ID_Cliente">Cliente:</label>
+        <select name="ID_Cliente" required>
+            <?php
+                $clientes = mysqli_query($conn, "SELECT ID_Cliente, Nombre, Primer_Apellido FROM Clientes ORDER BY Nombre ASC");
+                while ($c = mysqli_fetch_assoc($clientes)) {
+                    $selected = ($c['ID_Cliente'] == $venta['ID_Cliente']) ? "selected" : "";
+                    echo "<option value='{$c['ID_Cliente']}' $selected>{$c['Nombre']} {$c['Primer_Apellido']}</option>";
+                }
+            ?>
+        </select><br><br>
 
-    <!-- Tiendas -->
-    <label for="tienda_id">Tienda:</label><br>
-    <select id="tienda_id" name="ID_Tienda" required>
-        <option value="">Seleccione la tienda</option>
-        <?php
-        $sql_tiendas = "SELECT ID_Tienda, Nombre_Tienda FROM Tiendas ORDER BY Nombre_Tienda ASC";
-        $resultado_tiendas = mysqli_query($conn, $sql_tiendas);
-        while ($tienda = mysqli_fetch_assoc($resultado_tiendas)) {
-            $selected = ($tienda['ID_Tienda'] == $ID_Tienda) ? "selected" : "";
-            echo "<option value='{$tienda['ID_Tienda']}' $selected>{$tienda['Nombre_Tienda']}</option>";
-        }
-        ?>
-    </select><br><br>
+        <label for="ID_Metodo_Pago">Método de pago:</label>
+        <select name="ID_Metodo_Pago" required>
+            <option value="1" <?php if ($venta['ID_Metodo_Pago'] == 1) echo "selected"; ?>>Efectivo</option>
+            <option value="2" <?php if ($venta['ID_Metodo_Pago'] == 2) echo "selected"; ?>>Tarjeta Débito</option>
+            <option value="3" <?php if ($venta['ID_Metodo_Pago'] == 3) echo "selected"; ?>>Tarjeta Crédito</option>
+        </select><br><br>
 
-    <!-- Clientes -->
-    <label for="cliente_id">Cliente:</label><br>
-    <select id="cliente_id" name="ID_Cliente" required>
-        <option value="">Seleccione el cliente</option>
-        <?php
-        $sql_cliente = "SELECT ID_Cliente, Nombre, Primer_Apellido, Documento FROM Clientes ORDER BY Nombre ASC";
-        $resultado_cliente = mysqli_query($conn, $sql_cliente);
-        while ($cliente = mysqli_fetch_assoc($resultado_cliente)) {
-            $selected = ($cliente['ID_Cliente'] == $ID_Cliente) ? "selected" : "";
-            echo "<option value='{$cliente['ID_Cliente']}' $selected>{$cliente['Nombre']} {$cliente['Primer_Apellido']} - Doc: {$cliente['Documento']}</option>";
-        }
-        ?>
-    </select><br><br>
+        <label for="Fecha">Fecha:</label>
+        <input type="date" name="Fecha" value="<?php echo $venta['Fecha']; ?>" required><br><br>
 
-    <!-- Métodos de pago -->
-    <label for="Metodo_Pago">Método de pago:</label><br>
-    <select id="Metodo_Pago" name="ID_Metodo_Pago" required>
-        <option value="">Seleccione el método de pago</option>
-        <?php
-        $sql_metodos = "SELECT ID_Metodo_Pago, Nombre FROM Metodo_Pago ORDER BY Nombre ASC";
-        $resultado_metodos = mysqli_query($conn, $sql_metodos);
-        while ($metodo = mysqli_fetch_assoc($resultado_metodos)) {
-            $selected = ($metodo['ID_Metodo_Pago'] == $ID_Metodo_Pago) ? "selected" : "";
-            echo "<option value='{$metodo['ID_Metodo_Pago']}' $selected>{$metodo['Nombre']}</option>";
-        }
-        ?>
-    </select><br><br>
+        <label for="Total_Venta">Total Venta:</label>
+        <input type="number" name="Total_Venta" value="<?php echo $venta['Total_Venta']; ?>" step="0.01" min="0" required><br><br>
 
-
-    <!-- Fecha -->
-    <label for="Fecha">Fecha de venta:</label><br>
-    <input type="date" id="Fecha" name="Fecha" value="<?php echo $Fecha; ?>" required><br><br>
-
-    <!-- Total -->
-    <label for="Total_Venta">Total de la venta:</label><br>
-    <input type="number" id="Total_Venta" name="Total_Venta" value="<?php echo $Total_Venta; ?>" step="0.01" min="0" required><br><br>
-
-    <input type="submit" value="Actualizar Venta">
-</form>
-
+        <input type="submit" value="Actualizar">
+    </form>
+    <br>
+    <a href="ventas.php">Cancelar</a>
 </body>
 </html>

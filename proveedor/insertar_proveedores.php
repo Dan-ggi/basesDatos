@@ -1,24 +1,34 @@
 <?php
-    include '../conexion_bd.php';
-    $conn = conexion_bd();
+include '../conexion_bd.php';
 
-    // Obtener los datos del formulario
-    $Nombre = $_POST['Nombre'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nombre = $_POST['Nombre'];
+    $telefono = $_POST['Telefono'];
+    $email = $_POST['Email'];
 
-    // Consulta corregida (sin la coma después de Nombre_Cargo)
-    $sql = "INSERT INTO Proveedores (
-        Nombre
-    ) VALUES (
-        '$Nombre'
-    )";
+    if (!empty($nombre) && !empty($telefono) && !empty($email)) {
+        $conn = conexion_bd();
 
-    if (mysqli_query($conn, $sql)) {
-        echo "Proveedor registrado correctamente.";
+        // Sanitizar datos
+        $nombre = mysqli_real_escape_string($conn, $nombre);
+        $telefono = mysqli_real_escape_string($conn, $telefono);
+        $email = mysqli_real_escape_string($conn, $email);
+
+        $sql = "INSERT INTO Proveedores (Nombre, Telefono, Email) 
+                VALUES ('$nombre', '$telefono', '$email')";
+
+        if (mysqli_query($conn, $sql)) {
+            header("Location: proveedores.php");
+            exit;
+        } else {
+            echo "Error al registrar proveedor: " . mysqli_error($conn);
+        }
+
+        mysqli_close($conn);
     } else {
-        echo "Error al registrar el proveedor: " . mysqli_error($conn);
+        echo "Todos los campos son obligatorios.";
     }
-
-    mysqli_close($conn);
-    header("Location: proveedores.php");
-    exit;
+} else {
+    echo "Acceso denegado.";
+}
 ?>

@@ -1,24 +1,32 @@
 <?php
-    include '../conexion_bd.php';
-    $conn = conexion_bd();
+include '../conexion_bd.php';
 
-    // Obtener los datos del formulario
-    $Nombre_Tienda = $_POST['Nombre_Tienda'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nombre_tienda = $_POST['Nombre_Tienda'];
+    $id_ubicacion = $_POST['ID_Ubicacion'];
 
-    $sql = "INSERT INTO Tiendas (
-        Nombre_Tienda
-    ) VALUES (
-        '$Nombre_Tienda'
-    )";
+    // Validar que ambos campos vienen correctamente
+    if (!empty($nombre_tienda) && !empty($id_ubicacion)) {
+        $conn = conexion_bd();
 
-    if (mysqli_query($conn, $sql)) {
-        echo "Tienda registrada correctamente.";
+        // Prevenir inyección SQL
+        $nombre_tienda = mysqli_real_escape_string($conn, $nombre_tienda);
+        $id_ubicacion = intval($id_ubicacion);
+
+        $sql = "INSERT INTO Tiendas (Nombre_Tienda, ID_Ubicacion) VALUES ('$nombre_tienda', $id_ubicacion)";
+
+        if (mysqli_query($conn, $sql)) {
+            header("Location: tiendas.php"); // redirigir después de insertar
+            exit;
+        } else {
+            echo "Error al insertar tienda: " . mysqli_error($conn);
+        }
+
+        mysqli_close($conn);
     } else {
-        echo "Error al registrar la tienda: " . mysqli_error($conn);
+        echo "Todos los campos son obligatorios.";
     }
-
-    mysqli_close($conn);
-    header("Location: tiendas.php");
-    exit;
+} else {
+    echo "Acceso no permitido.";
+}
 ?>
-

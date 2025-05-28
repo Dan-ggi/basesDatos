@@ -1,26 +1,37 @@
 <?php
-    include '../conexion_bd.php';
-    $conn=conexion_bd();
+session_start();
+if (!isset($_SESSION['usuario'])) {
+    header("Location: login.php");
+    exit;
+}
 
-    $ID_Venta = intval($_POST['ID_Venta']);
-    $ID_Factura = $_POST['ID_Factura'];
-    $ID_Tienda = $_POST['ID_Tienda'];
-    $ID_Cliente = $_POST['ID_Cliente'];
-    $ID_Metodo_Pago = $_POST['ID_Metodo_Pago'];
-    $Fecha_Venta = $_POST['Fecha_Venta'];
-    $Total_Venta = $_POST['Total_Venta'];
+include '../conexion_bd.php';
+$conn = conexion_bd();
 
-    echo $sql = "UPDATE Ventas SET 
-        ID_Factura='$ID_Factura', 
-        ID_Tienda='$ID_Tienda', 
-        ID_Cliente='$ID_Cliente', 
-        ID_Metodo_Pago='$ID_Metodo_Pago', 
-        Fecha_Venta='$Fecha_Venta', 
-        Total_Venta='$Total_Venta' 
-    WHERE ID_Venta=$ID_Venta";
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $id_venta = intval($_POST['ID_Venta']);
+    $id_tienda = intval($_POST['ID_Tienda']);
+    $id_cliente = intval($_POST['ID_Cliente']);
+    $id_metodo_pago = intval($_POST['ID_Metodo_Pago']);
+    $fecha = mysqli_real_escape_string($conn, $_POST['Fecha']);
+    $total = floatval($_POST['Total_Venta']);
 
-    mysqli_query($conn, $sql);
-    header("Location: ventas.php");
-    mysqli_close($conn);
+    $sql = "UPDATE Ventas 
+            SET ID_Tienda = $id_tienda, 
+                ID_Cliente = $id_cliente, 
+                ID_Metodo_Pago = $id_metodo_pago, 
+                Fecha = '$fecha', 
+                Total_Venta = $total 
+            WHERE ID_Venta = $id_venta";
 
+    if (mysqli_query($conn, $sql)) {
+        header("Location: ventas.php");
+        exit;
+    } else {
+        echo "Error al actualizar la venta: " . mysqli_error($conn);
+    }
+} else {
+    echo "Acceso no permitido.";
+}
 ?>
+
